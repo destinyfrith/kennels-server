@@ -64,3 +64,35 @@ def get_single_employee(id):
         employee = Employee(data['id'], data['name'], data['location_id'])
 
         return json.dumps(employee.__dict__)
+
+# function that GETS employees by location
+# use location_id as parameters
+# make sure to add new if statement in do_GET function on request_handler
+# import function into init and request_handler modules like always
+
+
+def get_employees_by_location(location_id):
+
+    with sqlite3.connect("./kennel.sqlite3") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        # Write the SQL query to get the information you want
+        db_cursor.execute("""
+        SELECT
+            e.id,
+            e.name,
+            e.location_id
+        FROM employee e
+        WHERE e.location_id = ?
+        """, (location_id, ))
+
+        employees = []
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            employee = Employee(
+                row['id'], row['name'], row['location_id'])
+            employees.append(employee.__dict__)
+
+    return json.dumps(employees)
