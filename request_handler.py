@@ -1,6 +1,6 @@
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from views.animal_requests import get_all_animals, get_single_animal, get_animals_by_location, get_animals_by_status
+from views.animal_requests import get_all_animals, get_single_animal, get_animals_by_location, get_animals_by_status, delete_animal
 from views.location_requests import get_all_locations, get_single_location
 from views.customer_requests import get_all_customers, get_single_customer, get_customers_by_email
 from views.employee_requests import get_all_employees, get_single_employee, get_employees_by_location
@@ -176,29 +176,23 @@ class HandleRequests(BaseHTTPRequestHandler):
     # It handles any PUT request.
 
     def do_PUT(self):
+    content_len = int(self.headers.get('content-length', 0))
+    post_body = self.rfile.read(content_len)
+    post_body = json.loads(post_body)
+
+    # Parse the URL
+    (resource, id) = self.parse_url(self.path)
+
+    success = False
+
+    if resource == "animals":
+        success = update_animal(id, post_body)
+    # rest of the elif's
+
+    if success:
         self._set_headers(204)
-        content_len = int(self.headers.get('content-length', 0))
-        post_body = self.rfile.read(content_len)
-        post_body = json.loads(post_body)
-
-        # Parse the URL
-        (resource, id) = self.parse_url(self.path)
-
-        # Delete a single animal from the list
-        if resource == "animals":
-            update_animal(id, post_body)
-
-        # Delete a single customer from the list
-        if resource == "customers":
-            update_customer(id, post_body)
-
-            # Delete a single customer from the list
-        if resource == "employees":
-            update_employee(id, post_body)
-
-            # Delete a single customer from the list
-        if resource == "locations":
-            update_location(id, post_body)
+    else:
+        self._set_headers(404)
 
         # Encode the new animal and send in response
         self.wfile.write("".encode())
