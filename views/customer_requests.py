@@ -19,7 +19,7 @@ def get_all_customers():
             c.address,
             c.email,
             c.password
-        FROM customer c
+        FROM Customer c
         """)
 
         # Initialize an empty list to hold all customer representations
